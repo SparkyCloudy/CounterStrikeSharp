@@ -12,10 +12,8 @@
  * This sample plugin is public domain.
  */
 
+#pragma once
 #define VPROF_LEVEL 1
-
-#ifndef _INCLUDE_METAMOD_SOURCE_STUB_PLUGIN_H_
-#define _INCLUDE_METAMOD_SOURCE_STUB_PLUGIN_H_
 
 // clang-format off
 #include <ISmmPlugin.h>
@@ -30,9 +28,7 @@
 // clang-format on
 
 namespace counterstrikesharp {
-class ScriptCallback;
-
-class CounterStrikeSharpMMPlugin : public ISmmPlugin, public IMetamodListener
+class CounterStrikeSharpMMPlugin final : public ISmmPlugin, public IMetamodListener
 {
   public:
     bool Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) override;
@@ -41,7 +37,7 @@ class CounterStrikeSharpMMPlugin : public ISmmPlugin, public IMetamodListener
     bool Unpause(char* error, size_t maxlen) override;
     void AllPluginsLoaded() override;
 
-  public: // hooks
+    // hooks
     void OnLevelInit(char const* pMapName,
                      char const* pMapEntities,
                      char const* pOldLevel,
@@ -49,14 +45,7 @@ class CounterStrikeSharpMMPlugin : public ISmmPlugin, public IMetamodListener
                      bool loadGame,
                      bool background) override;
     void OnLevelShutdown() override;
-    void Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick);
-    void Hook_StartupServer(const GameSessionConfiguration_t& config, ISource2WorldSession*, const char*);
-    void AddTaskForNextFrame(std::function<void()>&& task);
 
-    void Hook_RegisterLoopMode(const char* pszLoopModeName, ILoopModeFactory* pLoopModeFactory, void** ppGlobalPointer);
-    IEngineService* Hook_FindService(const char* serviceName);
-
-  public:
     const char* GetAuthor() override;
     const char* GetName() override;
     const char* GetDescription() override;
@@ -66,15 +55,14 @@ class CounterStrikeSharpMMPlugin : public ISmmPlugin, public IMetamodListener
     const char* GetDate() override;
     const char* GetLogTag() override;
 
+    void HookGameFrame(bool bSimulating, bool bFirstTick, bool bLastTick);
+    static void HookStartupServer(const GameSessionConfiguration_t& config, ISource2WorldSession*, const char*);
+    void AddTaskForNextFrame(std::function<void()>&& Task);
+
+    static void HookRegisterLoopMode(const char* szLoopModeName, ILoopModeFactory* pLoopModeFactory, void** ppGlobalPointer);
+    static IEngineService* HookFindService(const char* szServiceName);
+
   private:
     moodycamel::ConcurrentQueue<std::function<void()>> m_nextTasks;
 };
-
-static ScriptCallback* on_activate_callback;
-static ScriptCallback* on_metamod_all_plugins_loaded_callback;
-extern CounterStrikeSharpMMPlugin gPlugin;
-
-PLUGIN_GLOBALVARS();
-
-#endif //_INCLUDE_METAMOD_SOURCE_STUB_PLUGIN_H_
-}
+} // namespace counterstrikesharp

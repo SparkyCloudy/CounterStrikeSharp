@@ -70,11 +70,11 @@ bool CCoreConfig::Init(char* conf_error, int conf_error_size)
     return true;
 }
 
-const std::string CCoreConfig::GetPath() const { return m_sPath; }
+std::string CCoreConfig::GetPath() const { return m_sPath; }
 
-bool CCoreConfig::IsTriggerInternal(std::vector<std::string> triggers, const std::string& message, std::string& prefix) const
+bool CCoreConfig::IsTriggerInternal(const std::vector<std::string>& triggers, const std::string& message, std::string& prefix)
 {
-    for (std::string& trigger : triggers)
+    for (const std::string& trigger : triggers)
     {
         if (message.rfind(trigger, 0) == 0)
         {

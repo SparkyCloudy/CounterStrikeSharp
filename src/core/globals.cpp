@@ -42,6 +42,8 @@ CModule* vscript = nullptr;
 } // namespace modules
 
 namespace globals {
+SourceHook::Impl::CSourceHookImpl source_hook_impl;
+
 IVEngineServer2* engineServer2 = nullptr;
 IVEngineServer* engine = nullptr;
 IGameEventManager2* gameEventManager = nullptr;
@@ -72,13 +74,16 @@ ICvar* cvars = nullptr;
 ISource2Server* server = nullptr;
 CGlobalEntityList* globalEntityList = nullptr;
 CounterStrikeSharpMMPlugin* mmPlugin = nullptr;
-SourceHook::Impl::CSourceHookImpl source_hook_impl;
 SourceHook::ISourceHook* source_hook = &source_hook_impl;
 ISmmAPI* ismm = nullptr;
+ISmmPlugin* plApi = nullptr;
 CGameEntitySystem* entitySystem = nullptr;
 CCoreConfig* coreConfig = nullptr;
 CGameConfig* gameConfig = nullptr;
 ISource2GameEntities* gameEntities = nullptr;
+
+ScriptCallback* onActivateCallback = nullptr;
+ScriptCallback* onMetamodAllPluginsLoaded = nullptr;
 
 // Custom Managers
 CallbackManager callbackManager;
@@ -116,10 +121,10 @@ void Initialize()
     entitySystem = interfaces::pGameResourceServiceServer->GetGameEntitySystem();
 
     GetLegacyGameEventListener = reinterpret_cast<GetLegacyGameEventListener_t*>(
-        modules::server->FindSignature(globals::gameConfig->GetSignature("LegacyGameEventListener")));
+        modules::server->FindSignature(gameConfig->GetSignature("LegacyGameEventListener")));
 
     GameEventManagerInit = reinterpret_cast<GameEventManagerInit_t*>(
-        modules::server->FindSignature(globals::gameConfig->GetSignature("CGameEventManager_Init")));
+        modules::server->FindSignature(gameConfig->GetSignature("CGameEventManager_Init")));
 
     if (GameEventManagerInit == nullptr)
     {
@@ -127,8 +132,8 @@ void Initialize()
         return;
     }
 
-    auto m_hook = funchook_create();
-    funchook_prepare(m_hook, (void**)&GameEventManagerInit, (void*)&DetourGameEventManagerInit);
+    const auto m_hook = funchook_create();
+    funchook_prepare(m_hook, reinterpret_cast<void**>(&GameEventManagerInit), reinterpret_cast<void*>(&DetourGameEventManagerInit));
     funchook_install(m_hook, 0);
 }
 
@@ -141,10 +146,10 @@ void DetourGameEventManagerInit(IGameEventManager2* pGameEventManager)
     eventManager.OnAllInitialized_Post();
 }
 
-int source_hook_pluginid = 0;
-CGlobalVars* getGlobalVars() {
-    INetworkGameServer* server = networkServerService->GetIGameServer();
-    if (!server) return nullptr;
+PluginId source_hook_pluginid = 0;
+CGlobalVars* getGlobalVars()
+{
+    if (const INetworkGameServer* server = networkServerService->GetIGameServer(); !server) return nullptr;
     return networkServerService->GetIGameServer()->GetGlobals();
 }
 } // namespace globals

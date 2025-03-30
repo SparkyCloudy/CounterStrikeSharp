@@ -37,19 +37,18 @@ class CCoreConfig
     bool UnlockConVars = true;
 
     using json = nlohmann::json;
-    CCoreConfig(const std::string& path);
+    explicit CCoreConfig(const std::string& path);
     ~CCoreConfig();
 
     bool Init(char* conf_error, int conf_error_size);
-    const std::string GetPath() const;
+    std::string GetPath() const;
 
     bool IsSilentChatTrigger(const std::string& message, std::string& prefix) const;
     bool IsPublicChatTrigger(const std::string& message, std::string& prefix) const;
 
   private:
-    bool IsTriggerInternal(std::vector<std::string> triggers, const std::string& message, std::string& prefix) const;
+    static bool IsTriggerInternal(const std::vector<std::string>& triggers, const std::string& message, std::string& prefix) ;
 
-  private:
     std::string m_sPath;
     json m_json;
 };
