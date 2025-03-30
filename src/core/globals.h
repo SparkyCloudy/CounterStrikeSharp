@@ -61,7 +61,8 @@ class ServerManager;
 class VoiceManager;
 class CCoreConfig;
 class CGameConfig;
-
+class ScriptCallback;
+class CounterStrikeSharpMMPlugin;
 namespace globals {
 
 extern IVEngineServer* engine;
@@ -111,21 +112,27 @@ extern ServerManager serverManager;
 extern VoiceManager voiceManager;
 extern TickScheduler tickScheduler;
 
-extern HookManager hookManager;
+// SourceHook need it
 extern SourceHook::ISourceHook* source_hook;
-extern int source_hook_pluginid;
-extern IGameEventSystem* gameEventSystem;
 extern CounterStrikeSharpMMPlugin* mmPlugin;
 extern ISmmAPI* ismm;
+extern ISmmPlugin* plApi;
+extern PluginId source_hook_pluginid;
+
+extern HookManager hookManager;
+extern IGameEventSystem* gameEventSystem;
 extern CCoreConfig* coreConfig;
 extern CGameConfig* gameConfig;
+
+extern ScriptCallback* onActivateCallback;
+extern ScriptCallback* onMetamodAllPluginsLoaded;
 
 extern const float engine_fixed_tick_interval;
 
 typedef void GameEventManagerInit_t(IGameEventManager2* gameEventManager);
 typedef IGameEventListener2* GetLegacyGameEventListener_t(CPlayerSlot slot);
 
-static void DetourGameEventManagerInit(IGameEventManager2* gameEventManager);
+static void DetourGameEventManagerInit(IGameEventManager2* pGameEventManager);
 
 extern bool gameLoopInitialized;
 extern GetLegacyGameEventListener_t* GetLegacyGameEventListener;
@@ -154,7 +161,23 @@ extern CModule* vscript;
 
 } // namespace counterstrikesharp
 
+// re-define SourceHook.h macro
 #undef SH_GLOB_SHPTR
-#define SH_GLOB_SHPTR counterstrikesharp::globals::source_hook
 #undef SH_GLOB_PLUGPTR
-#define SH_GLOB_PLUGPTR counterstrikesharp::globals::source_hook_pluginid
+#undef META_LOG
+#undef META_REGCMD
+#undef META_REGCVAR
+#undef META_REGCMD
+#undef META_UNREGCVAR
+#undef META_CONPRINT
+#undef META_REGCMD
+
+#define SH_GLOB_SHPTR       counterstrikesharp::globals::source_hook
+#define SH_GLOB_PLUGPTR     counterstrikesharp::globals::source_hook_pluginid
+#define META_LOG            counterstrikesharp::globals::ismm->LogMsg
+#define META_REGCMD(name)   counterstrikesharp::globals::ismm->RegisterConCommandBase(counterstrikesharp::globals::plApi, name##_command)
+#define META_REGCVAR(var)   counterstrikesharp::globals::ismm->RegisterConCommandBase(counterstrikesharp::globals::plApi, var)
+#define META_UNREGCMD(name) counterstrikesharp::globals::ismm->UnregisterConCommandBase(counterstrikesharp::globals::plApi, name##_command)
+#define META_UNREGCVAR(var) counterstrikesharp::globals::ismm->UnregisterConCommandBase(counterstrikesharp::globals::plApi, var)
+#define	META_CONPRINT       counterstrikesharp::globals::ismm->ConPrint
+#define META_CONPRINTF      counterstrikesharp::globals::ismm->ConPrintf
