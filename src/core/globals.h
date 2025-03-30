@@ -161,26 +161,23 @@ extern CModule* vscript;
 
 } // namespace counterstrikesharp
 
+// re-define SourceHook.h macro
 #undef SH_GLOB_SHPTR
-#define SH_GLOB_SHPTR counterstrikesharp::globals::source_hook
 #undef SH_GLOB_PLUGPTR
-#define SH_GLOB_PLUGPTR counterstrikesharp::globals::source_hook_pluginid
+#undef META_LOG
+#undef META_REGCMD
+#undef META_REGCVAR
+#undef META_REGCMD
+#undef META_UNREGCVAR
+#undef META_CONPRINT
+#undef META_REGCMD
 
-#undef SH_DECL_HOOK3_void
-#define SH_DECL_HOOK3_void(ifacetype, ifacefunc, attr, overload, param1, param2, param3)                                               \
-    SHINT_MAKE_GENERICSTUFF_BEGIN(ifacetype, ifacefunc, overload,                                                                      \
-                                  (static_cast<void (ifacetype::*)(param1, param2, param3) attr>(&ifacetype::ifacefunc)))              \
-    typedef fastdelegate::FastDelegate<void, param1, param2, param3> FD;                                                               \
-    MAKE_DELEG_void((param1 p1, param2 p2, param3 p3), (p1, p2, p3));                                                                  \
-    virtual void Func(param1 p1, param2 p2, param3 p3) { SH_HANDLEFUNC_void((param1, param2, param3), (p1, p2, p3)); }                 \
-    SHINT_MAKE_GENERICSTUFF_END(ifacetype, ifacefunc, overload,                                                                        \
-                                (static_cast<void (ifacetype::*)(param1, param2, param3) attr>(&ifacetype::ifacefunc)))                \
-                                                                                                                                       \
-    const ::SourceHook::PassInfo __SourceHook_ParamInfos_##ifacetype##ifacefunc##overload[] = {                                        \
-        { 1, 0, 0 }, __SH_GPI(param1), __SH_GPI(param2), __SH_GPI(param3)                                                              \
-    };                                                                                                                                 \
-    const ::SourceHook::PassInfo::V2Info __SourceHook_ParamInfos2_##ifacetype##ifacefunc##overload[] = { __SH_EPI, __SH_EPI, __SH_EPI, \
-                                                                                                         __SH_EPI };                   \
-    ::SourceHook::ProtoInfo SH_FHCls(ifacetype, ifacefunc,                                                                             \
-                                     overload)::ms_Proto = { 3, { 0, 0, 0 }, __SourceHook_ParamInfos_##ifacetype##ifacefunc##overload, \
-                                                             0, __SH_EPI,    __SourceHook_ParamInfos2_##ifacetype##ifacefunc##overload };
+#define SH_GLOB_SHPTR       counterstrikesharp::globals::source_hook
+#define SH_GLOB_PLUGPTR     counterstrikesharp::globals::source_hook_pluginid
+#define META_LOG            ismm->LogMsg
+#define META_REGCMD(name)   ismm->RegisterConCommandBase(g_PLAPI, name##_command)
+#define META_REGCVAR(var)   ismm->RegisterConCommandBase(g_PLAPI, var)
+#define META_UNREGCMD(name) ismm->UnregisterConCommandBase(g_PLAPI, name##_command)
+#define META_UNREGCVAR(var) ismm->UnregisterConCommandBase(g_PLAPI, var)
+#define	META_CONPRINT       ismm->ConPrint
+#define META_CONPRINTF      ismm->ConPrintf
