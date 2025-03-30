@@ -42,7 +42,15 @@ CModule* vscript = nullptr;
 } // namespace modules
 
 namespace globals {
+// Static Initialize
+CounterStrikeSharpMMPlugin plugin;
 SourceHook::Impl::CSourceHookImpl source_hook_impl;
+
+// SourceHook
+CounterStrikeSharpMMPlugin* mmPlugin = &plugin;
+SourceHook::ISourceHook* source_hook = &source_hook_impl;
+ISmmAPI* ismm = nullptr;
+ISmmPlugin* plApi = mmPlugin;
 
 IVEngineServer2* engineServer2 = nullptr;
 IVEngineServer* engine = nullptr;
@@ -73,10 +81,6 @@ CDotNetManager dotnetManager;
 ICvar* cvars = nullptr;
 ISource2Server* server = nullptr;
 CGlobalEntityList* globalEntityList = nullptr;
-CounterStrikeSharpMMPlugin* mmPlugin = nullptr;
-SourceHook::ISourceHook* source_hook = &source_hook_impl;
-ISmmAPI* ismm = nullptr;
-ISmmPlugin* plApi = nullptr;
 CGameEntitySystem* entitySystem = nullptr;
 CCoreConfig* coreConfig = nullptr;
 CGameConfig* gameConfig = nullptr;

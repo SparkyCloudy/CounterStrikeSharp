@@ -84,7 +84,6 @@ ConVar sample_cvar("sample_cvar", "42", 0);
 PLUGIN_EXPOSE(CounterStrikeSharpMMPlugin, plugin);
 bool CounterStrikeSharpMMPlugin::Load(const PluginId id, ISmmAPI* ismm, char* error, const size_t maxlen, bool late)
 {
-    PLUGIN_SAVEVARS();
     globals::ismm = ismm;
     globals::gameThreadId = std::this_thread::get_id();
 
@@ -127,7 +126,6 @@ bool CounterStrikeSharpMMPlugin::Load(const PluginId id, ISmmAPI* ismm, char* er
     globals::Initialize();
 
     CSSHARP_CORE_INFO("Globals loaded.");
-    globals::mmPlugin = &plugin;
 
     CALL_GLOBAL_LISTENER(OnAllInitialized());
 
